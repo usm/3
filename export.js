@@ -1,8 +1,9 @@
 let hello = `hello UMS3 at ${Date()}`
 
-class usm {
+class USM{
     constructor(seq='acggctagagctag',abc){
-        this.created=Date()
+        // if seq is a url
+        this.created = Date()
         // sequence
         this.seq = cleanSeq(seq)
         // alphabet
@@ -12,13 +13,29 @@ class usm {
 
 function cleanSeq(seq){ // split sequence into array if needed
     if(typeof(seq)=='string'){
-        if(!seq.match(/[\,/\s]/)){
+        if(!seq.match(/[\,/\s]/)){ // if sequence is provided as a string
             seq=seq.split('')
-        } else {
-            seq=seq.split(/[\,/\s\;\.]+/)
+        } else { // if provided as a [,;t] delimited string
+            seq=seq.split(/[\,/\s\;\./\t]+/)
         }
     }
     return seq
+}
+
+async function getSeq(seq='https://www.ncbi.nlm.nih.gov/sviewer/viewer.fcgi?id=399923581&db=nuccore&report=fasta&extrafeat=null&conwithfeat=on&hide-cdd=on&retmode=html&withmarkup=on&tool=portal&log$=seqview'){
+    let res={seq:seq}
+    if(seq.match(/^http[s]*:\/\//)){ // if it is a url
+        res.url=seq
+        res.seq = await (await fetch(seq)).text()
+    }
+    if(res.seq.match(/^>[^\n\r]*/)){ // if fastA
+        res.name = res.seq.match(/^>[^\n\r]*/)[0]
+        res.seq=res.seq.replace(/^>[^\n\r]*/,'').replace(/[\n\r]/g,'')
+    }
+    if(Object.keys(res).length==1){ // raw unnanotated sequence, no fastA
+        res=res.seq
+    }
+    return res
 }
 
 function cleanAbc(abc,seq){ // assemble alphabet if needed
@@ -44,10 +61,10 @@ function int2bin(v,n=Math.floor(Math.log2(v))+1){ // integer to binary as an arr
     return bb.length>0?bb:[0]
 }
 
-
 export{
-    usm,
+    USM,
     hello,
     rep,
-    int2bin
+    int2bin,
+    getSeq
 }
