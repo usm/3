@@ -1,12 +1,13 @@
 console.log(`USM3 index.js loaded \n${Date()}`);
 
 (async function(){
-    USM = (await import('./usm.mjs')).USM
+    U = (await import('./usm.mjs'))
     if(typeof(define)!='undefined'){ // in the odd chance someone is still using require ...
-        define(USM)
+        define(U)
     }
-    u = new USM
+    u = new U.USM
     console.log(u)
+    //debugger
 })()
 
 /* Notes

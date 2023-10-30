@@ -61,10 +61,20 @@ function int2bin(v,n=Math.floor(Math.log2(v))+1){ // integer to binary as an arr
     return bb.length>0?bb:[0]
 }
 
+async function efecth(id='NM_000546'){
+    let seq = await (await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id=${id}&rettype=fasta&retmode=text`)).text()
+    let seqLines = seq.split(/\n/)
+    console.log(seqLines[0])
+    return seqLines.slice(1).join('')
+}
+
+
+
 export{
     USM,
     hello,
     rep,
     int2bin,
-    getSeq
+    getSeq,
+    efecth
 }
