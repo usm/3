@@ -22,6 +22,7 @@ function cleanSeq(seq){ // split sequence into array if needed
     return seq
 }
 
+
 async function getSeq(seq='https://www.ncbi.nlm.nih.gov/sviewer/viewer.fcgi?id=399923581&db=nuccore&report=fasta&extrafeat=null&conwithfeat=on&hide-cdd=on&retmode=html&withmarkup=on&tool=portal&log$=seqview'){
     let res={seq:seq}
     if(seq.match(/^http[s]*:\/\//)){ // if it is a url
@@ -61,14 +62,20 @@ function int2bin(v,n=Math.floor(Math.log2(v))+1){ // integer to binary as an arr
     return bb.length>0?bb:[0]
 }
 
-async function efecth(id='NM_000546'){
-    let seq = await (await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id=${id}&rettype=fasta&retmode=text`)).text()
+async function efetch(id='NM_000546',db='nucleotide',retmode='text'){
+    let seq = await (await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=${db}&id=${id}&rettype=fasta&retmode=${retmode}`))[`${retmode}`]()
     let seqLines = seq.split(/\n/)
     console.log(seqLines[0])
     return seqLines.slice(1).join('')
 }
 
+async function esearch(term='TP53',db='nuccore',retmax=100){
+    return await (await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=${db}&term=${term}&retmax=${retmax}&retmode=json`)).json()
+}
 
+async function einfo(db=''){ // empty query will return list
+    return await (await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?db=${db}&retmode=json`)).json()
+}
 
 export{
     USM,
@@ -76,5 +83,7 @@ export{
     rep,
     int2bin,
     getSeq,
-    efecth
+    efetch,
+    esearch,
+    einfo
 }
