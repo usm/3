@@ -1,13 +1,19 @@
 let hello = `hello UMS3 at ${Date()}`
 
 class USM{
-    constructor(seq='acggctagagctag',abc){
+    constructor(seq='ATTAGCCAGGTATGGTGATGCATGCCTGTAGTCAGAGCTACTCAGGAGGCTAAGGTGGGAGGATCACCTG',abc,seed){
         // if seq is a url
         this.created = Date()
         // sequence
         this.seq = cleanSeq(seq)
         // alphabet
-        this.abc = cleanAbc(abc,this.seq)
+        this.abc=abc||[...new Set(seq)].sort()
+        // edges
+        this.edges=edging(this.abc)
+        // seed
+        this.seed=seed
+        // Build the USMap
+        iteratedMap(this)
     } 
 }
 
@@ -22,6 +28,33 @@ function cleanSeq(seq){ // split sequence into array if needed
     return seq
 }
 
+function rep(v=0,n=2){  // replicate v n times
+    return [...new Array(n)].map(_=>v)
+}
+
+function int2bin(v,n=Math.floor(Math.log2(v))+1){ // integer to binary as an array of length n
+    let bb=rep(0,n<0?0:n)
+    for(var i in bb){
+        let k = 2**(n-i-1)
+        if(v>=k){
+            bb[i]=1
+            v-=k
+        }
+    }
+    return bb.length>0?bb:[0]
+}
+
+function edging(abc){ // determine compact edges of an alphabet
+    const n = Math.ceil(Math.log2(abc.length)) // dimensions needed for compact notation
+    const edges={}
+    abc.forEach((a,i)=>{
+        edges[a]=int2bin(i,n)
+        if(edges[a].length==0){
+            edges[a]=[0]
+        }
+    })
+    return edges
+}
 
 async function getSeq(seq='https://www.ncbi.nlm.nih.gov/sviewer/viewer.fcgi?id=399923581&db=nuccore&report=fasta&extrafeat=null&conwithfeat=on&hide-cdd=on&retmode=html&withmarkup=on&tool=portal&log$=seqview'){
     let res={seq:seq}
@@ -39,27 +72,10 @@ async function getSeq(seq='https://www.ncbi.nlm.nih.gov/sviewer/viewer.fcgi?id=3
     return res
 }
 
-function cleanAbc(abc,seq){ // assemble alphabet if needed
-    if(!abc){
-        abc=[...new Set(seq)].sort()
-    }
-    return abc
-}
+// iterate the USM map
 
-function rep(v=0,n=2){  // replicate v n times
-    return [...new Array(n)].map(_=>v)
-}
-
-function int2bin(v,n=Math.floor(Math.log2(v))+1){ // integer to binary as an array of length n
-    let bb=rep(0,n<0?0:n)
-    for(var i in bb){
-        let k = 2**(n-i-1)
-        if(v>=k){
-            bb[i]=1
-            v-=k
-        }
-    }
-    return bb.length>0?bb:[0]
+function iteratedMap(u){ // this instance, u
+    debugger
 }
 
 // e-Utils
@@ -98,6 +114,7 @@ export{
     hello,
     rep,
     int2bin,
+    edging,
     getSeq,
     eFetch,
     eSearch,

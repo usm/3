@@ -5,7 +5,7 @@ console.log(`USM3 index.js loaded \n${Date()}`);
     if(typeof(define)!='undefined'){ // in the odd chance someone is still using require ...
         define(U)
     }
-    u = new U.USM
+    u = new U.USM('ATTAGCCAGGTATGGTGATGCATGCCTGTAGTCAGAGCTACTCAGGAGGCTAAGGTGGGAGGATCACCTG')
     console.log(u)
     //debugger
 })()
