@@ -1,17 +1,23 @@
 let hello = `hello UMS3 at ${Date()}`
 
 class USM{
-    constructor(seq='ATTAGCCAGGTATGGTGATGCATGCCTGTAGTCAGAGCTACTCAGGAGGCTAAGGTGGGAGGATCACCTG',abc,seed){
+    constructor(seq='ATTAGCCAGGTATGGTGATGCATGCCTGTAGTCAGAGCTACTCAGGAGGCTAAGGTGGGAGGATCACCTG',abc,seed,edges){
         // if seq is a url
         this.created = Date()
         // sequence
         this.seq = cleanSeq(seq)
+        this.n=this.seq.length
         // alphabet
         this.abc=abc||[...new Set(seq)].sort()
+        this.h=Math.ceil(Math.log2(this.abc.length))
         // edges
-        this.edges=edging(this.abc)
+        this.edges=edges||edging(this.abc)
         // seed
-        this.seed=seed
+        //this.seed=seed||"bidirectional"
+        this.seed=seed||1/2 //original CGR
+        if(typeof(this.seed)=='number'){
+            this.seed=rep(this.seed,this.h)
+        }
         // Build the USMap
         iteratedMap(this)
     } 
@@ -75,7 +81,15 @@ async function getSeq(seq='https://www.ncbi.nlm.nih.gov/sviewer/viewer.fcgi?id=3
 // iterate the USM map
 
 function iteratedMap(u){ // this instance, u
-    debugger
+    // lets get the binary edges of each unit
+    //u.edgeSeq=u.seq.forEach(s=>0)
+    u.edgeSeq=rep(rep(0,u.n),u.h)
+    u.edgeSeq.forEach((d,j)=>{
+        // find the edge for each dimention, j, for each ith sequence unit 
+        u.edgeSeq[j]=u.edgeSeq[j].map((_,i)=>u.edges[u.seq[i]][j])
+        // and replace it by the iterated map coordinate
+        4
+    })
 }
 
 // e-Utils
