@@ -1,7 +1,12 @@
 let hello = `hello UMS3 at ${Date()}`
 
+import "https://cdn.plot.ly/plotly-2.27.0.min.js" // loading plotly to the global scope (their choice, not mine :-( )
+
+//import "https://esm.sh/plotly@1.0.6"
+
+
 class USM {
-    constructor(seq='ATTAGCCAGGTATGGTGATGCATGCCTGTAGTCAGAGCTACTCAGGAGGCTAAGGTGGGAGGATCACCTG', abc, seed, edges) {
+    constructor(seq='ATTAGCCAGGTATGGTGATGCATGCCTGTAGTCAGAGCTACTCAGGAGGCTAAGGTGGGAGGATCACCTG', seed, abc, edges) {
         // if seq is a url
         this.created = Date()
         // sequence
@@ -21,6 +26,10 @@ class USM {
         }
         // Build the USMap
         iteratedMap(this)
+        // ploting
+        this.plotPoints=function(div,size=500,direction='forward'){
+            return plotPoints(this,div,size=500,direction='forward')
+        }
     }
 }
 
@@ -128,6 +137,119 @@ function iteratedMap(u) {
     })
 }
 
+// Plotting
+
+function plotPoints(u=this,div,size=500,direction='forward'){
+    if(!div){
+        div = document.createElement('div')
+        document.body.appendChild(div)
+        div.innerHTML='ploting ...'
+    }
+    let trace = {
+        x:u[direction][0],
+        y:u[direction][1],
+        mode: 'lines+markers+text',
+        type: 'scatter',
+        line:{
+            width:1,
+            color:'silver'
+        },
+        marker:{
+            color:'rgba(255,255,0,0.5)',
+            line:{
+                color:'navy',
+                width:1
+            },
+            size:18
+        },
+        text:u.seq,
+        showlegend: false
+    }
+    let gridTrace={
+        x:[1/4,1/4,undefined,1/2,1/2,undefined,3/4,3/4,undefined,0,1,undefined,0,1,undefined,0,1],
+        y:[0,1,undefined,0,1,undefined,0,1,undefined,1/4,1/4,undefined,1/2,1/2,undefined,3/4,3/4],
+        showlegend: false,
+        mode:'lines',
+        type:'scatter',
+        line:{
+            color:'silver',
+        }
+    }
+    let gridCross={
+        y:[1/2,1/2,undefined,0,1],
+        x:[0,1,undefined,1/2,1/2],
+        showlegend: false,
+        mode:'lines',
+        type:'scatter',
+        line:{
+            color:'gray',
+        }
+    }
+    //let edges={
+    //    x:[-0.01,0,1,1],
+    //    y:[-0.01,1,0,1],
+    //    mode:'text',
+    //    text:['A','C','G','T'],
+    //    showlegend: false
+    //}
+    
+    // red-green start-finish
+    let traceRedGreen = {
+        x:[u[direction][0][0],u[direction][0][u.n-1]],
+        y:[u[direction][1][0],u[direction][1][u.n-1]],
+        mode: 'markers',
+        type: 'scatter',
+        marker:{
+            line:false,
+            color:['rgba(255,0,0,0.5)','rgba(0,255,0,0.5)'],
+            size:20
+        },
+        showlegend: false
+    }
+    let traces = [gridTrace,gridCross,trace,traceRedGreen]
+    let layout = {
+        title:`USM ${direction} coordinates`,
+        xaxis: {
+            range: [0, 1],
+            linecolor: 'black',
+            linewidth: 1,
+            mirror: 'all',
+            ticks: 'outside',
+            tick0: 0,
+            tickvals:[...Array(17)].map((_,i)=>i/16),
+            ticktext:['0','','','','1/4','','','','1/2','','','','3/4','','','','1']
+          },
+        yaxis: {
+            range: [0, 1],
+            linecolor: 'black',
+            linewidth: 1,
+            ticks: 'outside',
+            tick0: 0,
+            mirror: 'all',
+            tickvals:[...Array(17)].map((_,i)=>i/16),
+            ticktext:['0','','','','1/4','','','','1/2','','','','3/4','','','','1']
+        },
+        margin: {
+            pad: 0
+        },
+        //plot_bgcolor: 'rgba(0,0,0,0)',
+        //paper_bgcolor: 'rgba(0,0,0,0)',
+        annotations:[
+            {x:0,y:0,ax:-15,ay:15,text:'A',font:{size: 16}},
+            {x:0,y:1,ax:-15,ay:-15,text:'C',font:{size: 16}},
+            {x:1,y:1,ax:15,ay:-15,text:'T',font:{size: 16}},
+            {x:1,y:0,ax:15,ay:15,text:'G',font:{size: 16}}
+        ],
+        width:size,
+        height:size
+    }
+    Plotly.newPlot(div,traces,layout)
+    //debugger
+    return div
+    //console.log(u)
+    
+}
+
 // e-Utils
 // txt query --(eSearch)--> UIDs
 // UIDs --(eSummary)--> record eSummary
@@ -161,4 +283,17 @@ async function eLink(id='2606992112', db='nuccore') {
     return await (await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi?db=${db}&id=${id}&retmode=json`)).json()
 }
 
-export {USM, hello, rep, int2bin, edging, getSeq, eFetch, eSearch, eInfo, eSummary, eLink}
+export {
+    USM,
+    hello,
+    rep,
+    int2bin,
+    edging,
+    getSeq,
+    eFetch,
+    eSearch,
+    eInfo,
+    eSummary,
+    eLink,
+    plotPoints
+}
