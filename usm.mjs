@@ -27,8 +27,8 @@ class USM {
         // Build the USMap
         iteratedMap(this)
         // ploting
-        this.plotPoints=function(div,size=500,direction='forward'){
-            return plotPoints(this,div,size=500,direction='forward')
+        this.plotACGT=function(div,size=500,direction='forward'){
+            return plotACGT(this,div,size=500,direction='forward')
         }
     }
 }
@@ -139,12 +139,22 @@ function iteratedMap(u) {
 
 // Plotting
 
-function plotPoints(u=this,div,size=500,direction='forward'){
+function plotACGT(u=this,div,size=500,direction='forward'){
     if(!div){
         div = document.createElement('div')
         document.body.appendChild(div)
-        div.innerHTML='ploting ...'
+        //div.innerHTML='ploting ...'
     }
+    // prepare text labels, depending on the encoding
+    let txt = u.seq
+    if(typeof(u.seed)=='object'){ // traditional CGR
+        if(direction=='forward'){
+            
+        }
+    }else{
+        txt= u.seq
+    }
+    
     let trace = {
         x:u[direction][0],
         y:u[direction][1],
@@ -162,7 +172,7 @@ function plotPoints(u=this,div,size=500,direction='forward'){
             },
             size:18
         },
-        text:u.seq,
+        text:txt,
         showlegend: false
     }
     let gridTrace={
@@ -201,7 +211,7 @@ function plotPoints(u=this,div,size=500,direction='forward'){
         type: 'scatter',
         marker:{
             line:false,
-            color:['rgba(255,0,0,0.5)','rgba(0,255,0,0.5)'],
+            color:['rgba(0,255,0,0.5)','rgba(255,0,0,0.5)'],
             size:20
         },
         showlegend: false
@@ -295,5 +305,5 @@ export {
     eInfo,
     eSummary,
     eLink,
-    plotPoints
+    plotACGT
 }
