@@ -154,6 +154,12 @@ function plotACGT(u=this,div,size=500,direction='forward'){
     }else{
         txt= u.seq
     }
+
+    let lengthColors=[...Array(u.n)].map((_,i)=>{
+        let red = parseInt((i/u.n)*100)
+        let green = 100-red
+        return `rgba(${red+200},${green+200},255,0.75)` 
+    })
     
     let trace = {
         x:u[direction][0],
@@ -165,7 +171,8 @@ function plotACGT(u=this,div,size=500,direction='forward'){
             color:'silver'
         },
         marker:{
-            color:'rgba(255,255,0,0.5)',
+            //color:'rgba(255,255,0,0.5)',
+            color:lengthColors,
             line:{
                 color:'navy',
                 width:1
