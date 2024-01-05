@@ -6,7 +6,7 @@ import "https://cdn.plot.ly/plotly-2.27.0.min.js" // loading plotly to the globa
 
 
 class USM {
-    constructor(seq='ATTAGCCAGGTATGGTGATGCATGCCTGTAGTCAGAGCTACTCAGGAGGCTAAGGTGGGAGGATCACCTG', seed, abc, edges) {
+    constructor(seq='ATTAGCCAGGTATGGTGATGCATGCCTGTAGTCAGAGCTACTCAGGAGGCTAAGGTGGGAGGATCACCTG', seed=0.5, abc, edges) {
         // if seq is a url
         this.created = Date()
         // sequence
@@ -19,13 +19,18 @@ class USM {
         this.edges = edges || edging(this.abc)
         // seed
         //this.seed=seed||"bidirectional"
-        this.seed = seed || 1 / 2
+        this.seed = seed || 1/2
         //original CGR
-        if (typeof (this.seed) == 'number') {
+        if (typeof (this.seed) == 'number') {  // a single number, projected to all dimensions
             this.seed = rep(this.seed, this.h)
+        } else if(Array.isArray(seed)){ // exact coordinates for seeding
+            this.seed=seed
+        }
+        if(this.seed=='middle'){ // another way to specify classic CGR
+            this.seed = rep(0.5, this.h)
         }
         // Build the USMap
-        iteratedMap(this)
+        iteratedMap(this) // this is where all teh work takes place
         // ploting
         this.plotACGT=function(div,size=500,direction='forward'){
             return plotACGT(this,div,size=500,direction='forward')
@@ -110,12 +115,42 @@ function iteratedMap(u) {
         // find the edge for each dimention, j, for each ith sequence unit 
         u.seqEdge[j] = u.seqEdge[j].map((_,i)=>u.edges[u.seq[i]][j])
         // and replace it by the iterated map coordinate
-        if (typeof (u.seed) == 'string') {
-            // this is one of the iterated methods
-            4
+        if (typeof (u.seed) == 'string') { // this is one of the named iterated seeding methods
+            
+            if(u.seed=='circular'){
+                console.log('-------- circular mapping --------')
+                // first pass - FORWARD
+                iterateForward(u,j)
+                // tie tail back to the beginning
+                let tail = u.forward[j][u.n-1]
+                // second pass
+                iterateForward(u,j,tail)
+                // keep going
+                while(tail!=u.forward[j][u.n-1]){
+                    console.log(`forward:${j}`,tail,u.forward[j][u.n-1])
+                    tail = u.forward[j][u.n-1]
+                    iterateForward(u,j,tail)
+                }
+                console.log(`forward:${j}`,tail,u.forward[j][u.n-1])
+                
+                // first pass - BACWARD
+                iterateBackward(u,j)
+                // tie head back to the end
+                let head = u.backward[j][0]
+                // second pass
+                iterateBackward(u,j,head)
+                // keep going
+                while(head!=u.backward[j][0]){
+                    console.log(`backward:${j}`,head,u.backward[j][0])
+                    head = u.backward[j][0]
+                    iterateBackward(u,j,head)
+                }
+                console.log(`backward:${j}`,head,u.backward[j][0])
+                
+            }
             // not developed yet
         } else {
-            // this has a fixed seed
+            // this has a fixed seed and is the reference for iterated seeding
             u.forward[j].forEach((ufi,i)=>{
                 if (i == 0) {
                     u.forward[j][i] = u.seed[j] + (u.seqEdge[j][i]-u.seed[j])/2
@@ -134,6 +169,29 @@ function iteratedMap(u) {
                 }
             })
         }
+    })
+}
+
+function iterateForward(u,j=0,i0=0.5){ // jth dimension
+    u.forward[j].forEach((ufi,i)=>{
+        if (i == 0) {
+            u.forward[j][i] = i0 + (u.seqEdge[j][i]-i0)/2
+        }else{
+            u.forward[j][i] = u.forward[j][i-1]+(u.seqEdge[j][i]-u.forward[j][i-1])/2
+        }
+        //console.log(j,i,u.seqEdge[j][i],u.forward[j][i])
+    })
+}
+
+function iterateBackward(u,j=0,i0=0.5){  // jth dimension
+    u.backward[j].forEach((ufi,i)=>{
+        i=u.n-i-1 // going backward
+        if (i == u.n-1) {
+            u.backward[j][i] = i0 + (u.seqEdge[j][i]-i0)/2
+        }else{
+            u.backward[j][i] = u.backward[j][i+1]+(u.seqEdge[j][i]-u.backward[j][i+1])/2
+        }
+        //console.log(j,i,u.seqEdge[j][i],u.backward[j][i])
     })
 }
 
