@@ -6,8 +6,10 @@ console.log(`USM3 index.js loaded \n${Date()}`);
         define(U)
     }
     //u = new U.USM('ATTAGCCAGGTATGGTGATGCATGCCTGTAGTCAGAGCTACTCAGGAGGCTAAGGTGGGAGGATCACCTG','circular')
+    //u = new U.USM('GATACA','circular')
+    //  = new U.USM('GATACAGATA','circular')
+    //u = new U.USM('GATACA')
     u = new U.USM('GATACA','circular')
-    //u = new U.USM('GATACAGATA','circular')
     console.log(u)
     //debugger
 })()

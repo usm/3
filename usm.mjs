@@ -33,7 +33,7 @@ class USM {
         iteratedMap(this) // this is where all teh work takes place
         // ploting
         this.plotACGT=function(div,size=500,direction='forward'){
-            return plotACGT(this,div,size=500,direction='forward')
+            return plotACGT(this,div,size,direction)
         }
     }
 }
@@ -116,9 +116,10 @@ function iteratedMap(u) {
         u.seqEdge[j] = u.seqEdge[j].map((_,i)=>u.edges[u.seq[i]][j])
         // and replace it by the iterated map coordinate
         if (typeof (u.seed) == 'string') { // this is one of the named iterated seeding methods
-            
+            let ctMax=1000 // infinite looping cutoff
+            let ct = 0 // count
             if(u.seed=='circular'){
-                console.log('-------- circular mapping --------')
+                console.log(`-------- circular mapping dimension ${j+1} --------`)
                 // first pass - FORWARD
                 iterateForward(u,j)
                 // tie tail back to the beginning
@@ -126,8 +127,10 @@ function iteratedMap(u) {
                 // second pass
                 iterateForward(u,j,tail)
                 // keep going
-                while(tail!=u.forward[j][u.n-1]){
-                    console.log(`forward:${j}`,tail,u.forward[j][u.n-1])
+                ct=0
+                while((tail!=u.forward[j][u.n-1])&(ct<ctMax)){
+                    ct++
+                    console.log(`forward (${ct}):${j}`,tail,u.forward[j][u.n-1])
                     tail = u.forward[j][u.n-1]
                     iterateForward(u,j,tail)
                 }
@@ -140,17 +143,46 @@ function iteratedMap(u) {
                 // second pass
                 iterateBackward(u,j,head)
                 // keep going
-                while(head!=u.backward[j][0]){
-                    console.log(`backward:${j}`,head,u.backward[j][0])
+                ct=0
+                while((head!=u.backward[j][0])&(ct<ctMax)){
+                    ct++
+                    console.log(`backward (${ct}):${j}`,head,u.backward[j][0])
                     head = u.backward[j][0]
                     iterateBackward(u,j,head)
                 }
                 console.log(`backward:${j}`,head,u.backward[j][0])
                 
+            } else if(u.seed=='bidirectional'){
+                console.log(`-------- bidirectional mapping dimension ${j+1} --------`)
+                // first pass - FORWARD+BACWARD
+                iterateForward(u,j)
+                iterateBackward(u,j)
+                // tie heads
+                let head = u.backward[j][0]
+                let tail = u.forward[j][u.n-1]
+                // second pass
+                iterateForward(u,j,head)
+                iterateBackward(u,j,tail)
+                // keep going
+                console.log(`forward head:${j}`,head,u.backward[j][0],`backward tail:${j}`,tail,u.forward[j][u.n-1])
+                ct=0
+                while(((head!=u.backward[j][0])||(tail!=u.forward[j][u.n-1]))&(ct<ctMax)){
+                    ct++
+                    head = u.backward[j][0]
+                    tail = u.forward[j][u.n-1]
+                    iterateForward(u,j,head)
+                    iterateBackward(u,j,tail)
+                    console.log(`(${ct}) forward head:${j}`,head,u.backward[j][0],`backward tail:${j}`,tail,u.forward[j][u.n-1])
+                }               
+            } else {               
+                console.log(`mapping seed "${u.seed}" not recognized`)
             }
-            // not developed yet
+            
         } else {
             // this has a fixed seed and is the reference for iterated seeding
+            if(j==0){ // no need to repeat for each dimension
+                console.log(`mapping with fixed numerical seed ${JSON.stringify(u.seed)}`)
+            }
             u.forward[j].forEach((ufi,i)=>{
                 if (i == 0) {
                     u.forward[j][i] = u.seed[j] + (u.seqEdge[j][i]-u.seed[j])/2
@@ -197,7 +229,7 @@ function iterateBackward(u,j=0,i0=0.5){  // jth dimension
 
 // Plotting
 
-function plotACGT(u=this,div,size=500,direction='forward'){
+function plotACGT(u=this,div,size=500,direction='forward',seed=0.5){
     if(!div){
         div = document.createElement('div')
         document.body.appendChild(div)
@@ -205,6 +237,7 @@ function plotACGT(u=this,div,size=500,direction='forward'){
     }
     // prepare text labels, depending on the encoding
     let txt = u.seq
+    /*
     if(typeof(u.seed)=='object'){ // traditional CGR
         if(direction=='forward'){
             
@@ -212,6 +245,7 @@ function plotACGT(u=this,div,size=500,direction='forward'){
     }else{
         txt= u.seq
     }
+    */
 
     let lengthColors=[...Array(u.n)].map((_,i)=>{
         let red = parseInt((i/u.n)*100)
