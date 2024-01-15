@@ -317,7 +317,7 @@ function plotACGT(u=this,div,size=500,direction='forward',seed=0.5){
     }
     let traces = [gridTrace,gridCross,trace,traceRedGreen]
     let layout = {
-        title:`USM ${direction} coordinates`,
+        title:`USM ${direction} coordinates<br>${(typeof(u.seed)=='string')? u.seed : JSON.stringify (u.seed)} seed, n=${u.n}, h=${u.h}`,
         xaxis: {
             range: [0, 1],
             linecolor: 'black',
