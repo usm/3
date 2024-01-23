@@ -31,7 +31,16 @@ class USM {
         }
         // Build the USMap
         iteratedMap(this) // this is where all teh work takes place
+        this.fcgr=function(size){
+            return fcgr(this,size)
+        }
         // ploting
+        this.canvas=function(size,direction){
+            return canvasGray(this,size=200,direction="forward")
+        }
+        this.plotCanvas=function(size=500,direction="forward"){
+            return plotCanvas(this,size,direction)
+        }
         this.plotACGT=function(div,size=500,direction='forward'){
             return plotACGT(this,div,size,direction)
         }
@@ -227,7 +236,103 @@ function iterateBackward(u,j=0,i0=0.5){  // jth dimension
     })
 }
 
+function fcgr(u,size=2**4,direction="forward"){
+    let fr = [...Array(size)].map(_=>([...Array(size)].map(_=>0))) // FCGR
+    let xy=u[direction]
+    xy[0].forEach((_,i)=>{ // count FCGR
+        let x=Math.floor(xy[0][i]*size)
+        let y=Math.floor(xy[1][i]*size)
+        fr[x][y]+=1
+    })
+    return fr
+}
+
 // Plotting
+
+function canvasGray(u,size=200,direction="forward"){
+    size=Math.round(size) // just in case
+    let cv = document.createElement('canvas')
+    cv.width=cv.height=size
+    cv.style.border="1px solid black"
+    let ctx = cv.getContext('2d')
+    ctx.fillStyle = 'rgb(255, 255, 255)' // white
+    ctx.fillRect(0,0,size,size) // white background
+    let fcgr = [...Array(size)].map(_=>([...Array(size)].map(_=>0))) // FCGR
+    let xy=u[direction]
+    xy[0].forEach((_,i)=>{ // count FCGR
+        let x=Math.floor(xy[0][i]*size)
+        let y=Math.floor(xy[1][i]*size)
+        fcgr[x][y]+=1
+    })
+    let fcgrMax = Math.log(fcgr.map(c=>c.reduce(r=>Math.max(r))).reduce(s=>Math.max(s))+1)
+    fcgr.map((c,j)=>c.forEach((r,i)=>{
+        let val = 255-(Math.round(255*Math.log(fcgr[j][i]+1)/fcgrMax))
+        ctx.fillStyle = `rgb(${val},${val},${val})` // black map points
+        ctx.fillRect(size-i, size-j, 1, 1);
+    }))
+    return cv
+}
+
+function plotCanvas(u,size=200,direction="forward"){
+    size=Math.round(size) // just in case
+    let spc = 15 // marginal space
+    let sg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    sg.setAttribute('width',size+2*spc+2)
+    sg.setAttribute('height',size+2*spc+2)
+    let fobj = document.createElementNS('http://www.w3.org/2000/svg','foreignObject')
+    fobj.setAttribute("x",spc-1)
+    fobj.setAttribute("y",spc-1)
+    fobj.setAttribute("width",size+2)
+    fobj.setAttribute("height",size+2)
+    sg.appendChild(fobj)
+    let cv = canvas(u,size,direction)
+    fobj.appendChild(cv)
+    // edge labels
+    Object.keys(u.edges).forEach((edj,i)=>{
+        let txt = document.createElementNS('http://www.w3.org/2000/svg','text')
+        let x = u.edges[edj][0] //(u.edges[edj][0])*(size+spc+1)+10
+        let y = u.edges[edj][1]//(u.edges[edj][1])*(size+spc+1)+10
+        if(x*y){
+            x=size+spc+2;
+            y=size+spc*2-1;
+        } else {
+            if(x){
+                x=size+spc+2
+                y=spc-1
+            }else if(y){
+                x=2
+                y=size+spc*2-1
+            }else{
+                x=2
+                y=spc-1
+            }
+        }
+        txt.setAttribute("x",x)
+        txt.setAttribute("y",y)
+        txt.textContent=edj
+        txt.style.alignContent='left'
+        //txt.style.verticalAlign="top"
+        sg.appendChild(txt)
+    })
+    return sg
+}
+
+function canvas(u,size=200,direction="forward"){
+    let cv = document.createElement('canvas')
+    cv.width=cv.height=size
+    cv.style.border="1px solid black"
+    let ctx = cv.getContext('2d')
+    ctx.fillStyle = 'rgb(255, 255, 255)'
+    ctx.fillRect(0,0,size,size) // white background
+    ctx.fillStyle = 'rgb(0, 0, 0)' // black map points
+    let xy=u[direction]
+    xy[0].forEach((_,i)=>{
+        ctx.fillRect(Math.floor(xy[0][i]*size), Math.floor(xy[1][i]*size), 1, 1);
+        //debugger
+    })
+    //debugger
+    return cv
+}
 
 function plotACGT(u=this,div,size=500,direction='forward',seed=0.5){
     if(!div){
@@ -320,6 +425,7 @@ function plotACGT(u=this,div,size=500,direction='forward',seed=0.5){
         title:`USM ${direction} coordinates<br>${(typeof(u.seed)=='string')? u.seed : JSON.stringify (u.seed)} seed, n=${u.n}, h=${u.h}`,
         xaxis: {
             range: [0, 1],
+            fixedrange: true,
             linecolor: 'black',
             linewidth: 1,
             mirror: 'all',
@@ -330,6 +436,7 @@ function plotACGT(u=this,div,size=500,direction='forward',seed=0.5){
           },
         yaxis: {
             range: [0, 1],
+            fixedrange: true,
             linecolor: 'black',
             linewidth: 1,
             ticks: 'outside',
