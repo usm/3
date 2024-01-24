@@ -38,8 +38,8 @@ class USM {
         this.canvas=function(size,direction){
             return canvasGray(this,size=200,direction="forward")
         }
-        this.plotCanvas=function(size=500,direction="forward"){
-            return plotCanvas(this,size,direction)
+        this.plotCanvasGray=function(size=500,direction="forward"){
+            return plotCanvasGray(this,size,direction)
         }
         this.plotACGT=function(div,size=500,direction='forward'){
             return plotACGT(this,div,size,direction)
@@ -285,7 +285,51 @@ function plotCanvas(u,size=200,direction="forward"){
     fobj.setAttribute("width",size+2)
     fobj.setAttribute("height",size+2)
     sg.appendChild(fobj)
-    let cv = canvas(u,size,direction)
+    let cv = canvasGray(u,size,direction)
+    fobj.appendChild(cv)
+    // edge labels
+    Object.keys(u.edges).forEach((edj,i)=>{
+        let txt = document.createElementNS('http://www.w3.org/2000/svg','text')
+        let x = u.edges[edj][0] //(u.edges[edj][0])*(size+spc+1)+10
+        let y = u.edges[edj][1]//(u.edges[edj][1])*(size+spc+1)+10
+        if(x*y){
+            x=size+spc+2;
+            y=size+spc*2-1;
+        } else {
+            if(x){
+                x=size+spc+2
+                y=spc-1
+            }else if(y){
+                x=2
+                y=size+spc*2-1
+            }else{
+                x=2
+                y=spc-1
+            }
+        }
+        txt.setAttribute("x",x)
+        txt.setAttribute("y",y)
+        txt.textContent=edj
+        txt.style.alignContent='left'
+        //txt.style.verticalAlign="top"
+        sg.appendChild(txt)
+    })
+    return sg
+}
+
+function plotCanvasGray(u,size=200,direction="forward"){
+    size=Math.round(size) // just in case
+    let spc = 15 // marginal space
+    let sg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    sg.setAttribute('width',size+2*spc+2)
+    sg.setAttribute('height',size+2*spc+2)
+    let fobj = document.createElementNS('http://www.w3.org/2000/svg','foreignObject')
+    fobj.setAttribute("x",spc-1)
+    fobj.setAttribute("y",spc-1)
+    fobj.setAttribute("width",size+2)
+    fobj.setAttribute("height",size+2)
+    sg.appendChild(fobj)
+    let cv = canvasGray(u,size,direction)
     fobj.appendChild(cv)
     // edge labels
     Object.keys(u.edges).forEach((edj,i)=>{
