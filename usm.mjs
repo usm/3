@@ -31,14 +31,14 @@ class USM {
         }
         // Build the USMap
         iteratedMap(this) // this is where all teh work takes place
-        this.fcgr=function(size){
-            return fcgr(this,size)
+        this.fcgr=function(size,direction){
+            return fcgr(this,size,direction)
         }
         // ploting
         this.canvas=function(size,direction){
             return canvasGray(this,size=200,direction="forward")
         }
-        this.plotCanvasGray=function(size=500,direction="forward"){
+        this.plotCanvasGray=function(size=300,direction="forward"){
             return plotCanvasGray(this,size,direction)
         }
         this.plotACGT=function(div,size=500,direction='forward'){
@@ -330,7 +330,7 @@ function plotCanvasGray(u,size=200,direction="forward"){
     fobj.setAttribute("height",size+2)
     sg.appendChild(fobj)
     let cv = canvasGray(u,size,direction)
-    fobj.appendChild(cv)
+    fobj.appendChild(cv);
     // edge labels
     Object.keys(u.edges).forEach((edj,i)=>{
         let txt = document.createElementNS('http://www.w3.org/2000/svg','text')
