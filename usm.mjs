@@ -268,7 +268,7 @@ function canvasGray(u,size=200,direction="forward"){
     fcgr.map((c,j)=>c.forEach((r,i)=>{
         let val = 255-(Math.round(255*Math.log(fcgr[j][i]+1)/fcgrMax))
         ctx.fillStyle = `rgb(${val},${val},${val})` // black map points
-        ctx.fillRect(size-i, size-j, 1, 1);
+        ctx.fillRect(size-i-1, size-j-1, 1, 1);
     }))
     return cv
 }
