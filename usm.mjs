@@ -236,20 +236,21 @@ function iterateBackward(u,j=0,i0=0.5){  // jth dimension
     })
 }
 
-function fcgr(u,size=2**4,direction="forward"){
+function fcgr(u,size=2**8,direction="forward"){
     let fr = [...Array(size)].map(_=>([...Array(size)].map(_=>0))) // FCGR
     let xy=u[direction]
     xy[0].forEach((_,i)=>{ // count FCGR
         let x=Math.floor(xy[0][i]*size)
         let y=Math.floor(xy[1][i]*size)
-        fr[x][y]+=1
+        //fr[x][y]+=1 // normal tabular (top-down) row order
+        fr[size-x-1][y]+=1 // carthesian order
     })
     return fr
 }
 
 // Plotting
 
-function canvasGray(u,size=200,direction="forward"){
+function canvasGray(u,size=200,direction="forward",gray=true){
     size=Math.round(size) // just in case
     let cv = document.createElement('canvas')
     cv.width=cv.height=size
@@ -257,6 +258,7 @@ function canvasGray(u,size=200,direction="forward"){
     let ctx = cv.getContext('2d')
     ctx.fillStyle = 'rgb(255, 255, 255)' // white
     ctx.fillRect(0,0,size,size) // white background
+    /*
     let fcgr = [...Array(size)].map(_=>([...Array(size)].map(_=>0))) // FCGR
     let xy=u[direction]
     xy[0].forEach((_,i)=>{ // count FCGR
@@ -264,9 +266,13 @@ function canvasGray(u,size=200,direction="forward"){
         let y=Math.floor(xy[1][i]*size)
         fcgr[x][y]+=1
     })
-    let fcgrMax = Math.log(fcgr.map(c=>c.reduce(r=>Math.max(r))).reduce(s=>Math.max(s))+1)
+    */
+    let fcgr = u.fcgr(size,direction)
+    // let fcgrMax = Math.log(fcgr.map(c=>c.reduce(r=>Math.max(r))).reduce(s=>Math.max(s))+1)
+    let fcgrMax = Math.log(fcgr.map(row=>row.reduce((a,b)=>Math.max(a,b))).reduce((a,b)=>Math.max(a,b)))
     fcgr.map((c,j)=>c.forEach((r,i)=>{
-        let val = 255-(Math.round(255*Math.log(fcgr[j][i]+1)/fcgrMax))
+        //let val = 255-(Math.round(255*Math.log(fcgr[j][i]+1)/fcgrMax))
+        let val = parseInt(255-255*(Math.log(fcgr[j][i]+1)/fcgrMax))
         ctx.fillStyle = `rgb(${val},${val},${val})` // black map points
         ctx.fillRect(size-i-1, size-j-1, 1, 1);
     }))
@@ -309,6 +315,7 @@ function plotCanvas(u,size=200,direction="forward"){
         }
         txt.setAttribute("x",x)
         txt.setAttribute("y",y)
+        4
         txt.textContent=edj
         txt.style.alignContent='left'
         //txt.style.verticalAlign="top"
@@ -333,6 +340,7 @@ function plotCanvasGray(u,size=200,direction="forward"){
     fobj.appendChild(cv);
     // edge labels
     Object.keys(u.edges).forEach((edj,i)=>{
+    // ['C','G','A','T'].forEach((edj,i)=>{
         let txt = document.createElementNS('http://www.w3.org/2000/svg','text')
         let x = u.edges[edj][0] //(u.edges[edj][0])*(size+spc+1)+10
         let y = u.edges[edj][1]//(u.edges[edj][1])*(size+spc+1)+10
@@ -353,7 +361,13 @@ function plotCanvasGray(u,size=200,direction="forward"){
         }
         txt.setAttribute("x",x)
         txt.setAttribute("y",y)
-        txt.textContent=edj
+        let carthesianEdge={
+            'A':'C',
+            'C':'A',
+            'G':'T',
+            'T':'G'
+        }
+        txt.textContent=carthesianEdge[edj]
         txt.style.alignContent='left'
         //txt.style.verticalAlign="top"
         sg.appendChild(txt)
