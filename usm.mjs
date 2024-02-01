@@ -35,11 +35,11 @@ class USM {
             return fcgr(this,size,direction)
         }
         // ploting
-        this.canvas=function(size,direction){
-            return canvasGray(this,size=200,direction="forward")
+        this.canvasGray=function(size,direction,color){
+            return canvasGray(this,size=200,direction="forward",color=false)
         }
         this.plotCanvasGray=function(size=300,direction="forward",color=false){
-            return plotCanvasGray(this,size,direction,color=false)
+            return plotCanvasGray(this,size,direction,color)
         }
         this.plotACGT=function(div,size=500,direction='forward'){
             return plotACGT(this,div,size,direction)
@@ -271,19 +271,23 @@ function canvasGray(u,size=200,direction="forward",color=false){
     })
     */
     let fcgr = u.fcgr(size,direction)
-    // let fcgrMax = Math.log(fcgr.map(c=>c.reduce(r=>Math.max(r))).reduce(s=>Math.max(s))+1)
-    let fcgrMax = Math.log(fcgr.map(row=>row.reduce((a,b)=>Math.max(a,b))).reduce((a,b)=>Math.max(a,b)))
+    let fcgrMax = Math.log10(fcgr.map(row=>row.reduce((a,b)=>Math.max(a,b))).reduce((a,b)=>Math.max(a,b)))
     
     if(color){
         fcgr.map((c,j)=>c.forEach((r,i)=>{
-            let val = parseInt(255-255*(Math.log(fcgr[j][i]+1)/fcgrMax))
-            let rgb=cmap[val].map(x=>(255-x))
-            ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` // black map points
-            ctx.fillRect(size-i-1, size-j-1, 1, 1);
+            let val = parseInt(255*(Math.log10(fcgr[j][i]+1)/fcgrMax))
+            let rgb=cmap[val] //.map(x=>(255-x))
+            try{
+                
+            }catch(err){
+                debugger
+            }
+                ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` // black map points
+                ctx.fillRect(size-i-1, size-j-1, 1, 1);
         }))
     }else{
         fcgr.map((c,j)=>c.forEach((r,i)=>{
-            let val = parseInt(255-255*(Math.log(fcgr[j][i]+1)/fcgrMax))
+            let val = parseInt(255-255*(Math.log10(fcgr[j][i]+1)/fcgrMax))
             ctx.fillStyle = `rgb(${val},${val},${val})` // black map points
             ctx.fillRect(size-i-1, size-j-1, 1, 1);
         }))
@@ -291,6 +295,7 @@ function canvasGray(u,size=200,direction="forward",color=false){
     return cv
 }
 
+/*
 function plotCanvas(u,size=200,direction="forward"){
     size=Math.round(size) // just in case
     let spc = 15 // marginal space
@@ -335,8 +340,9 @@ function plotCanvas(u,size=200,direction="forward"){
     })
     return sg
 }
+*/
 
-function plotCanvasGray(u,size=200,direction="forward"){
+function plotCanvasGray(u,size=200,direction="forward",color){
     size=Math.round(size) // just in case
     let spc = 15 // marginal space
     let sg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -348,7 +354,7 @@ function plotCanvasGray(u,size=200,direction="forward"){
     fobj.setAttribute("width",size+2)
     fobj.setAttribute("height",size+2)
     sg.appendChild(fobj)
-    let cv = canvasGray(u,size,direction)
+    let cv = canvasGray(u,size,direction,color)
     fobj.appendChild(cv);
     // edge labels
     Object.keys(u.edges).forEach((edj,i)=>{
