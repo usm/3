@@ -31,12 +31,12 @@ class USM {
         }
         // Build the USMap
         iteratedMap(this) // this is where all teh work takes place
-        this.fcgr=function(size,direction){
+        this.fcgr=function(size=256,direction){
             return fcgr(this,size,direction)
         }
         // ploting
-        this.canvasGray=function(size,direction,color){
-            return canvasGray(this,size=200,direction="forward",color=false)
+        this.canvasGray=function(size=256,direction="forward",color=false){
+            return canvasGray(this,size,direction,color)
         }
         this.plotCanvasGray=function(size=300,direction="forward",color=false){
             return plotCanvasGray(this,size,direction,color)
@@ -575,6 +575,40 @@ async function eLink(id='2606992112', db='nuccore') {
     return await (await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi?db=${db}&id=${id}&retmode=json`)).json()
 }
 
+/*
+function scaleCanvas(cv,size){
+    const newCanvas = document.createElement('canvas');
+    const scaleFactor = size/cv.width // maybe update to allow independent x,y scaling 
+    newCanvas.width = cv.width * scaleFactor;
+    newCanvas.height = cv.height * scaleFactor;
+    const originalContext = cv.getContext('2d');
+    const newContext = newCanvas.getContext('2d');
+    newContext.scale(scaleFactor, scaleFactor);
+    newContext.drawImage(cv, 0, 0)
+    return newCanvas 
+}
+
+function scaleFCGR(u,direction='forward',n=20){
+    let scalled = [...Array(n)]
+        .map((x,i)=>[])
+        .map((x,j)=>[...Array(n)]
+        .map(x=>0))
+
+    let coord = u[direction]
+    for(let i=0;i<u.n;i++){
+        let x = Math.round(coord[0][i]*n)
+        let y = Math.round(coord[1][i]*n)
+        try{
+            scalled[y][x]+=1
+        }catch(err){
+            debugger
+        }
+        
+    }
+    return scalled
+}
+*/
+
 export {
     USM,
     hello,
@@ -587,5 +621,7 @@ export {
     eInfo,
     eSummary,
     eLink,
-    plotACGT
+    plotACGT,
+    //scaleCanvas,
+    //scaleFCGR
 }
