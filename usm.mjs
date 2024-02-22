@@ -253,14 +253,26 @@ function fcgr(u,size=2**8,direction="forward"){
 
 // Plotting
 
-function canvasGray(u,size=200,direction="forward",color=false){
+function canvasGray(u,size=200,direction="forward",color=false,rz=1){
     size=Math.round(size) // just in case
+    if(document.querySelector('#plotSize')){
+        if(document.querySelector('#resizeCheckbox')){
+            if(document.querySelector('#resizeCheckbox').checked){
+                // rz describes the resize factor needed to fit all quadrants in the assigned size
+                let fixedSize = parseInt(document.querySelector('#plotSize').value)
+                rz = fixedSize/size
+                if(direction=='backward'){
+                    console.log(`resize factor = ${rz}`)
+                }
+            }
+        }
+    }
     let cv = document.createElement('canvas')
-    cv.width=cv.height=size
-    cv.style.border="1px solid black"
+    cv.width=cv.height=size*rz
+    cv.style.border="1px solid red" //border
     let ctx = cv.getContext('2d')
     ctx.fillStyle = 'rgb(255, 255, 255)' // white
-    ctx.fillRect(0,0,size,size) // white background
+    ctx.fillRect(0,0,size*rz,size*rz) // white background
     /*
     let fcgr = [...Array(size)].map(_=>([...Array(size)].map(_=>0))) // FCGR
     let xy=u[direction]
@@ -272,26 +284,25 @@ function canvasGray(u,size=200,direction="forward",color=false){
     */
     let fcgr = u.fcgr(size,direction)
     let fcgrMax = Math.log10(fcgr.map(row=>row.reduce((a,b)=>Math.max(a,b))).reduce((a,b)=>Math.max(a,b)))
-    
+    // sz = scale between sizes
+    console.log('resize scale:',rz)
     if(color){
         fcgr.map((c,j)=>c.forEach((r,i)=>{
             let val = parseInt(255*(Math.log10(fcgr[j][i]+1)/fcgrMax))
             let rgb=cmap[val] //.map(x=>(255-x))
-            try{
-                
-            }catch(err){
-                debugger
-            }
-                ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` // black map points
-                ctx.fillRect(size-i-1, size-j-1, 1, 1);
+            ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` // black map points
+            ctx.fillRect(size-i-1, size-j-1, 1, 1);
         }))
-    }else{
+    }else{  // gray
         fcgr.map((c,j)=>c.forEach((r,i)=>{
             let val = parseInt(255-255*(Math.log10(fcgr[j][i]+1)/fcgrMax))
             ctx.fillStyle = `rgb(${val},${val},${val})` // black map points
-            ctx.fillRect(size-i-1, size-j-1, 1, 1);
+            //ctx.fillRect(size-i-1, size-j-1, 1, 1);
+            ctx.fillRect(parseInt(rz*(size-i-1)), parseInt(rz*((size-j)-1)), rz, rz);
+            rz
         }))
-    }        
+    }
+    console.log(direction,cv)
     return cv
 }
 
