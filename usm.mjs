@@ -240,6 +240,7 @@ function iterateBackward(u,j=0,i0=0.5){  // jth dimension
 }
 
 function fcgr(u,size=2**8,direction="forward"){
+    size=Math.round(size) // to avoid the numeric edge of integers (JS ...) 
     let fr = [...Array(size)].map(_=>([...Array(size)].map(_=>0))) // FCGR
     let xy=u[direction]
     xy[0].forEach((_,i)=>{ // count FCGR
@@ -308,7 +309,7 @@ function canvasGray(u,size=200,direction="forward",color=false,rz=1){
     ctx.fillStyle = 'rgba(255,0,0,0.5)'
     //let sz = size
     //ctx.fillRect(sz,sz,-sz,-sz)
-    console.log(direction,cv,parseFloat(rz))
+    //console.log(direction,cv,parseFloat(rz))
     return cv
 }
 
