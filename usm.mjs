@@ -285,25 +285,25 @@ function canvasGray(u,size=200,direction="forward",color=false,rz=1){
     })
     */
     let fcgr = u.fcgr(size/rz,direction)
-    let fcgrMax = Math.log10(fcgr.map(row=>row.reduce((a,b)=>Math.max(a,b))).reduce((a,b)=>Math.max(a,b)))
+    let fcgrMax = Math.log10(fcgr.map(row=>row.reduce((a,b)=>Math.max(a,b))).reduce((a,b)=>Math.max(a,b))+1) // note all empty, 0, will default to fcgrMax=1
     // sz = scale between sizes
     //console.log('resize scale:',rz)
     //size=size*rz
     if(color){
         fcgr.map((c,j)=>c.forEach((r,i)=>{
-            let val = parseInt(255*(Math.log10(fcgr[j][i]+1)/fcgrMax))
+            let val = Math.round(255*(Math.log10(fcgr[j][i]+1))/fcgrMax)
             let rgb=cmap[val] //.map(x=>(255-x))
             ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` // black map points
-            ctx.fillRect(size-i*rz-rz, size-j*rz-rz, rz, rz);
+            //ctx.fillRect(size-i*rz-rz, size-j*rz-rz, rz, rz);
+            ctx.fillRect(i*rz, j*rz, rz, rz);
         }))
     }else{  // gray
         fcgr.map((c,j)=>c.forEach((r,i)=>{
-            let val = parseInt(255-255*(Math.log10(fcgr[j][i]+1)/fcgrMax))
+            let val = 255-Math.round(255*(Math.log10(fcgr[j][i]+1))/fcgrMax)
             ctx.fillStyle = `rgb(${val},${val},${val})` // black map points
             //ctx.fillRect(size-i-1, size-j-1, 1, 1);
-            ctx.fillRect(size-i*rz-rz, size-j*rz-rz, rz, rz);
-            //ctx.fillRect(parseInt(rz*(size-i-1)), parseInt(rz*((size-j)-1)), rz, rz);
-            //rz
+            //ctx.fillRect(size-i*rz-rz, size-j*rz-rz, rz, rz);
+            ctx.fillRect(i*rz, j*rz, rz, rz);
         }))
     }
     ctx.fillStyle = 'rgba(255,0,0,0.5)'
