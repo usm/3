@@ -247,7 +247,7 @@ function fcgr(u,size=2**8,direction="forward"){
         let x=Math.floor(xy[0][i]*size)
         let y=Math.floor(xy[1][i]*size)
         //fr[x][y]+=1 // normal tabular (top-down) row order
-        fr[size-x-1][y]+=1 // carthesian order
+        fr[size-x-(x<size)][y]+=1 // carthesian order
     })
     return fr
 }
