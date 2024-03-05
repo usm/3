@@ -247,7 +247,20 @@ function fcgr(u,size=2**8,direction="forward"){
         let x=Math.floor(xy[0][i]*size)
         let y=Math.floor(xy[1][i]*size)
         //fr[x][y]+=1 // normal tabular (top-down) row order
-        fr[size-x-(x<size)][y]+=1 // carthesian order
+        fr[size-x-(x<size)][y-(y==size)]+=1 // carthesian order
+    })
+    return fr
+}
+
+function fcgrACGT(u,size=2**8,direction="forward"){
+    size=Math.round(size) // to avoid the numeric edge of integers (JS ...) 
+    let fr = [...Array(size)].map(_=>([...Array(size)].map(_=>0))) // FCGR
+    let xy=u[direction]
+    xy[0].forEach((_,i)=>{ // count FCGR
+        let x=Math.floor(xy[0][i]*size)
+        let y=Math.floor(xy[1][i]*size)
+        fr[x][y]+=1 // normal tabular (top-down) row order
+        //fr[size-x-(x<size)][y-(y==size)]+=1 // carthesian order
     })
     return fr
 }
@@ -306,7 +319,7 @@ function canvasGray(u,size=200,direction="forward",color=false,rz=1){
             ctx.fillRect(i*rz, j*rz, rz, rz);
         }))
     }
-    ctx.fillStyle = 'rgba(255,0,0,0.5)'
+    //ctx.fillStyle = 'rgba(255,0,0,0.5)'
     //let sz = size
     //ctx.fillRect(sz,sz,-sz,-sz)
     //console.log(direction,cv,parseFloat(rz))
