@@ -262,6 +262,12 @@ function fcgrACGT(u,size=2**8,direction="forward"){
         fr[x][y]+=1 // normal tabular (top-down) row order
         //fr[size-x-(x<size)][y-(y==size)]+=1 // carthesian order
     })
+    /*
+    if(!u.lastFCGR){
+        u.lastFCGR=[]
+    }
+    u.lastFCGR[direction]=fr
+    */
     return fr
 }
 
@@ -298,6 +304,8 @@ function canvasGray(u,size=200,direction="forward",color=false,rz=1){
     })
     */
     let fcgr = u.fcgr(size/rz,direction)
+    if(!u.lastFCGR){u.lastFCGR={}}
+    u.lastFCGR[direction]=fcgr  // keep last fw/bk fcgr in memory
     let fcgrMax = Math.log10(fcgr.map(row=>row.reduce((a,b)=>Math.max(a,b))).reduce((a,b)=>Math.max(a,b))+1) // note all empty, 0, will default to fcgrMax=1
     // sz = scale between sizes
     //console.log('resize scale:',rz)
